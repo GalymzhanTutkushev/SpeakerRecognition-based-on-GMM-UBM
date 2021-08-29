@@ -9,13 +9,13 @@
 clear;clc;
 
 % PathSpeechTest='D:\Galym stuff\matal\audio2019\testSh\';    мой путь
-PathSpeechTest='D:\diplom\test\';
+PathSpeechTest='C:\ayanDaus\diplom\test\';
 FileListTest = GetFileList(PathSpeechTest,2);
 Nt = length(FileListTest);
 [C_test,ID_test]=NN_train_VADst(1,Nt,PathSpeechTest,FileListTest);
 
 % PathSpeech='D:\Galym stuff\matal\audio2019\train\';
-PathSpeech='D:\diplom\train\';
+PathSpeech='C:\ayanDaus\diplom\train\';
 FileListS = GetFileList(PathSpeech,2);
 Ns = length(FileListS);
 %  NetFile = strcat('netALL.mat');
@@ -30,7 +30,7 @@ Ns = length(FileListS);
 % inter=5;
 % npart=Ns/inter;
 % dots=[0 1 2 3 4 5 10 15 20 25 30 35 40 45 50 55 60 65 70 75 80 85 90 95 100 105 110 115 120 125 130 135 140 145 150];
-dots=[0 5 10 20]; %точки
+dots=[0 Ns]; %точки
 npart=length(dots)-1;
 % savpath='D:\Galym stuff\matal\'; мой путь
 savpath='D:\diploma\results\';
@@ -43,7 +43,7 @@ err0=zeros(npart,1);
 % 'trainbr' takes longer but may be better for challenging problems.
 % 'trainscg' uses less memory. Suitable in low memory situations.
 trainFcn = 'trainlm';  % Scaled conjugate gradient backpropagation.
-hiddenLayerSize = [20 20 20];  % количество слоев нейросети
+hiddenLayerSize = 25;  % количество слоев нейросети
 for porog=0.5:0.1:0.5
 
    Num_pot=4;  %количество паралельных потоков
@@ -135,10 +135,10 @@ for porog=0.5:0.1:0.5
     end
        
     %% 
-    xlswrite(strcat(savpath,'sumerr',num2str(porog*10),'.xlsx'),sumErr)
-    xlswrite(strcat(savpath,'poserr',num2str(porog*10),'.xlsx'),posErr)
-    xlswrite(strcat(savpath,'negerr',num2str(porog*10),'.xlsx'),negErr)
-    xlswrite(strcat(savpath,'dictorsincrement.xlsx'),idata)
+%     xlswrite(strcat(savpath,'sumerr',num2str(porog*10),'.xlsx'),sumErr)
+%     xlswrite(strcat(savpath,'poserr',num2str(porog*10),'.xlsx'),posErr)
+%     xlswrite(strcat(savpath,'negerr',num2str(porog*10),'.xlsx'),negErr)
+%     xlswrite(strcat(savpath,'dictorsincrement.xlsx'),idata)
     figure, plotconfusion(ID_test',y)
     figure, ploterrhist(e)
     figure(110) 
@@ -381,13 +381,13 @@ end
 end  
     
 %% 
-%         MainPath = 'C:\Users\User\Desktop\';
+        MainPath = 'C:\ayanDaus\fcm\';
 %         TrainFileX = strcat(MainPath,'audio-inputALL.mat' );
 %         save(TrainFileX, 'x');
 %         TrainFileT = strcat(MainPath,'audio-targetALL.mat' );
 %         save(TrainFileT, 't');
-%         netfile=strcat(MainPath,'netALL.mat' );   
-%         save(netfile,'net')
+        netfile=strcat(MainPath,'net2020lm.mat' );   
+        save(netfile,'net')
         %% 
 % 
 % figure(122) 

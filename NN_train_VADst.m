@@ -14,15 +14,15 @@ for I=beg:en
  
     Chan=size(Y,2);
     p = floor(3*log(Fs));    %количество треугольных окон
-    preemph = [1 0.97];      %коэфициенты фильтрв
-    DN=0.02*Fs;              %длина кадра
-    NF=0.01*Fs;              %шаг сдвига кадра
+    preemph = [1 -0.97];      %коэфициенты фильтрв
+    DN=256;              %длина кадра
+    NF=128;              %шаг сдвига кадра
     
     for j=1:Chan
          
      Blocks = xlsread(XlsData,j);
      N=size(Blocks,1);
-    
+%     disp(Blocks);
          for i=1:N
            if  ~isnan(Blocks(i,3))
         
@@ -45,12 +45,13 @@ for I=beg:en
 %              disp(e)
 %         disp(size(Y))
 %           disp(j)
-             if e-b>160
+             if e-b>256
 
                     Y0 = Y(b:e,j);
                     Y0 = Y0-mean(Y0);
-                    Y0 = filter(1,preemph,Y0);
                     Y0 = Y0/max(abs(Y0));    % нормировка
+                    Y0 = filter(preemph,1,Y0);
+                    
                     
                     FrsCell = melcepst(Y0,Fs,'dD',12,p,DN,NF);   % input
                   

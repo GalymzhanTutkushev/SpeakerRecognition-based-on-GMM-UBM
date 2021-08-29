@@ -28,19 +28,19 @@ function gmm = mapAdapt(dataList, ubmFilename, tau, config, gmmFilename)
 % Omid Sadjadi <s.omid.sadjadi@gmail.com>
 % Microsoft Research, Conversational Systems Research Center
 
-if ( nargin < 3 ), 
+if ( nargin < 3 )
     tau = 19.0; % MAP adaptation relevance factor
 end
-if ( nargin < 4 ), config = ''; end;
+if ( nargin < 4 ), config = ''; end
 
 if ischar(tau), tau = str2double(tau); end
 
 if isempty(config), config = 'm'; end
 
-if ischar(ubmFilename),
+if ischar(ubmFilename)
 	tmp = load(ubmFilename);
 	ubm = tmp.gmm;
-elseif isstruct(ubmFilename),
+elseif isstruct(ubmFilename)
 	ubm = ubmFilename;
 else
 	error('oh dear! ubmFilename should be either a string or a structure!');
@@ -48,37 +48,37 @@ end
 
 gmm = ubm;
 
-if ischar(dataList) || iscellstr(dataList),
+if ischar(dataList) || iscellstr(dataList)
 	dataList = load_data(dataList);
 end
-if ~iscell(dataList),
+if ~iscell(dataList)
 	error('Oops! dataList should be a cell array!');
 end
 nfiles = length(dataList);
 
 N = 0; F = 0; S = 0;
-for file = 1 : nfiles,
+for file = 1 : nfiles
     [n, f, s] = expectation(dataList{file}, ubm);
     N = N + n; F = F + f; S = S + s;
 end
 % N
 % disp('----------------');
 
-if any(config == 'm'),
+if any(config == 'm')
 	alpha = N ./ (N + tau); % tarde-off between ML mean and UBM mean
 	m_ML = bsxfun(@rdivide, F, N);
 	m = bsxfun(@times, ubm.mu, (1 - alpha)) + bsxfun(@times, m_ML, alpha); 
 	gmm.mu = m;
 end
 
-if any(config == 'v'),
+if any(config == 'v')
 	alpha = N ./ (N + tau);
 	v_ML = bsxfun(@rdivide, S, N);
 	v = bsxfun(@times, (ubm.sigma+ubm.mu.^2), (1 - alpha)) + bsxfun(@times, v_ML, alpha) - (m .* m); 
 	gmm.sigma = v;
 end
 
-if any(config == 'w'),
+if any(config == 'w')
 	alpha = N ./ (N + tau);
 	w_ML = N / sum(N);
 	w = bsxfun(@times, ubm.w, (1 - alpha)) + bsxfun(@times, w_ML, alpha); 
@@ -86,7 +86,7 @@ if any(config == 'w'),
 	gmm.w = w;
 end
 
-if ( nargin == 5 ),
+if ( nargin == 5 )
 	% create the path if it does not exist and save the file
 	path = fileparts(gmmFilename);
 	if ( exist(path, 'dir')~=7 && ~isempty(path) ), mkdir(path); end
@@ -105,7 +105,7 @@ else
 end
 nfiles = size(filenames, 1);
 data = cell(nfiles, 1);
-for ix = 1 : nfiles,
+for ix = 1 : nfiles
     data{ix} = htkread(filenames{ix});
 end
 

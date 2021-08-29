@@ -44,11 +44,11 @@ nfiles = length(dataList);
 gmm = gmm_init(gm, gv); 
 
 % gradually increase the number of iterations per binary split
-% mix = [1 2 4 8 16 32 64 128 256 512 1024];
+ mix = [1 2 4 8 16 32 64 128 256 512 1024];
 niter = [1 2 4 4  4  4  6  6   10  10  15];
 niter(log2(nmix) + 1) = final_niter;
 
-mix = 1;
+% mix = 1;
 while ( mix <= nmix )
 	if ( mix >= nmix/2 ), ds_factor = 1; end % not for the last two splits!
 %     fprintf('\nRe-estimating the GMM hyperparameters for %d components ...\n', mix);

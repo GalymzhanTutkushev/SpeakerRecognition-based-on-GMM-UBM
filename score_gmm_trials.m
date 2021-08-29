@@ -1,4 +1,4 @@
-function llr = score_gmm_trials(models, testFiles, trials, ubmFilename)
+function [Sim,srednee,sigma,SSS,STD] = score_gmm_trials(models, testFiles, trials, ubmFilename, M_llr,S_llr)
 % computes the log-likelihood ratio of observations given the UBM and
 % speaker-specific (MAP adapted) models. 
 %
@@ -18,44 +18,84 @@ function llr = score_gmm_trials(models, testFiles, trials, ubmFilename)
 % Omid Sadjadi <s.omid.sadjadi@gmail.com>
 % Microsoft Research, Conversational Systems Research Center
 
-if ~iscell(models),
+if ~iscell(models)
     error('Oops! models should be a cell array of structures!');
 end
 
-if ischar(ubmFilename),
+if ischar(ubmFilename)
 	tmp = load(ubmFilename);
 	ubm = tmp.gmm;
-elseif isstruct(ubmFilename),
+elseif isstruct(ubmFilename)
 	ubm = ubmFilename;
 else
 	error('oh dear! ubmFilename should be either a string or a structure!');
 end
 
-if iscellstr(testFiles),
-    tlen = length(testFiles);
-    tests = cell(tlen, 1);
-    for ix = 1 : tlen,
-        tests{ix} = htkread(testFiles{ix});
-    end
-elseif iscell(testFiles),
+% if iscellstr(testFiles)
+%     tlen = length(testFiles);
+%     tests = cell(tlen, 1);
+%     for ix = 1 : tlen
+%         tests{ix} = htkread(testFiles{ix});
+%     end
+% else
+  if iscell(testFiles)
     tests = testFiles;
-else
+  else
     error('Oops! testFiles should be a cell array!');
-end
+  end
 
-ntrials = size(trials, 1);
+% ntrials = size(trials, 1);
+ntrials = prod(trials);
+% llr = cell(ntrials, 1);
+%  dispers = zeros(ntrials, 1);
+srednee = zeros(ntrials, 1);
+% tr=1;
+gmm_all=models{1};
+fea_all=tests;
+ubm_mu=ubm.mu;
+ubm_sigma=ubm.sigma;
+ubm_w=ubm.w(:);
 
-llr = zeros(ntrials, 1);
-tr=1;
-%  parfor tr = 1 : ntrials,
-for tr = 1 : ntrials,
-    gmm = models{trials(tr, 1)};
-    fea = tests{trials(tr, 2)};
-    ubm_llk = compute_llk(fea, ubm.mu, ubm.sigma, ubm.w(:));
+  parfor tr = 1 : ntrials
+% for tr = 1 : ntrials,
+
+    gmm = gmm_all;
+    
+    fea = fea_all{tr};
+    
+    if ~isempty(fea)
+    ubm_llk = compute_llk(fea, ubm_mu, ubm_sigma, ubm_w);
     gmm_llk = compute_llk(fea, gmm.mu, gmm.sigma, gmm.w(:));
-%     llr(tr) = mean(gmm_llk - ubm_llk);
-     llr = gmm_llk - ubm_llk;
-end
+    srednee(tr) = mean(gmm_llk - ubm_llk);
+    sig(tr) = std(gmm_llk - ubm_llk);
+    STD=std(gmm_llk - ubm_llk);
+    sigma(tr) = mean(((gmm_llk - ubm_llk)-(M_llr))./S_llr);
+    % figure();
+     %   plot((gmm_llk - ubm_llk));
+       % figure();
+        %histogram((gmm_llk - ubm_llk),10)
+       if srednee(tr)>0
+       
+         dy = gmm_llk - ubm_llk;
+         nC=size(dy,2);
+         Id1 = find(dy>0);  
+         Idx = numel(Id1);
+         Sim(tr) = 100*Idx/nC;
+         
+       else
+         Sim(tr) = 0;
+%        dispers(tr)=0;
+       end
+    else
+        srednee(tr)=0;
+        sigma(tr)=0;
+        Sim(tr) =0;
+%       dispers(tr)=0;
+%       llr{tr} = gmm_llk - ubm_llk;
+    end
+  end
+  SSS=mean(srednee);
+  STD=mean(sig);
 
 function llk = compute_llk(data, mu, sigma, w)
 % compute the posterior probability of mixtures for each frame
